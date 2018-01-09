@@ -24,32 +24,28 @@ import javax.swing.JPanel;
 
 public class GobangPanel extends JPanel {
 
-    private final int OFFSET = 45;// 棋盘偏移
-    private final int CELL_WIDTH = 40;// 棋格宽度
-    private int computerSide = Stone.BLACK;// 默认机器持黑
+    private final int OFFSET = 45;
+    private final int CELL_WIDTH = 40;
+    private int computerSide = Stone.BLACK;
     private final int RATE = 650 / 15;
     private final int X_OFFSET = 23;
     private final int Y_OFFSET = 28;
     private int humanSide = Stone.WHITE;
     private int cx = Board.CENTER, cy = Board.CENTER;
-    private boolean isShowOrder = false;// 显示落子顺序
-    private int[] lastStep;// 上一个落子点
-    private Board bd;// 棋盘，重要
-    private Robot br;// AI，重要
-    public static final int MANUAL = 0;// 双人模式
-    public static final int HALF = 1;// 人机模式
-    public static final int TREE = 2;// 估值函数+搜索树
-    private int mode;// 模式
-    private int intel;// 智能
+    private boolean isShowOrder = false;
+    private int[] lastStep;
+    private Board bd;
+    private Robot br;
+    public static final int MANUAL = 0;
+    public static final int HALF = 1;
+    public static final int TREE = 2;
+    private int mode;
+    private int intel;
     private boolean isGameOver = true;
     private BufferedImage table;
     private BufferedImage blackstone;
     private BufferedImage whitestone;
 
-
-
-
-    // 悔棋
     public void undo() {
         Point p = bd.undo();
         lastStep[0] = p.x;
@@ -75,31 +71,19 @@ public class GobangPanel extends JPanel {
         super.paintComponent(g2d);
         g2d.setStroke(new BasicStroke(2));
         g2d.setFont(new Font("April", Font.BOLD, 12));
-        // 画棋盘
-       // drawBoard(g2d);
-        ((Graphics2D) g).drawImage(table,0,0,650,661,null);
-        // 画天元和星
-        /*drawStar(g2d, Board.CENTER, Board.CENTER);
-        drawStar(g2d, (Board.BOARD_SIZE + 1) / 4, (Board.BOARD_SIZE + 1) / 4);
-        drawStar(g2d, (Board.BOARD_SIZE + 1) / 4,
-                (Board.BOARD_SIZE + 1) * 3 / 4);
-        drawStar(g2d, (Board.BOARD_SIZE + 1) * 3 / 4,
-                (Board.BOARD_SIZE + 1) / 4);
-        drawStar(g2d, (Board.BOARD_SIZE + 1) * 3 / 4,
-                (Board.BOARD_SIZE + 1) * 3 / 4);*/
-
-
-        // 画提示框
+        // draw board
+        ((Graphics2D) g).drawImage(table,0,0,650,661,null);     
+        // draw selected cell
         drawCell(g2d, cx, cy, 0);
 
         if (!isGameOver) {
-            // 画所有棋子
+            // draw stones
             for (int x = 1; x <= Board.BOARD_SIZE; ++x) {
                 for (int y = 1; y <= Board.BOARD_SIZE; ++y) {
                     drawChess(g2d, x, y, bd.getBoard()[x][y].getSide());
                 }
             }
-            // 画顺序
+            // draw order of stone
             if (isShowOrder)
                 drawOrder(g2d);
             else {
@@ -115,31 +99,7 @@ public class GobangPanel extends JPanel {
         }
     }
 
-    // 画棋盘
-    private void drawBoard(Graphics g2d) {
-        for (int x = 0; x < Board.BOARD_SIZE; ++x) {
-            g2d.drawLine(x * CELL_WIDTH + OFFSET, OFFSET, x * CELL_WIDTH
-                    + OFFSET, (Board.BOARD_SIZE - 1) * CELL_WIDTH + OFFSET);
-
-        }
-        for (int y = 0; y < Board.BOARD_SIZE; ++y) {
-            g2d.drawLine(OFFSET, y * CELL_WIDTH + OFFSET,
-                    (Board.BOARD_SIZE - 1) * CELL_WIDTH + OFFSET, y
-                            * CELL_WIDTH + OFFSET);
-
-        }
-    }
-
-    // 画天元和星
-    private void drawStar(Graphics g2d, int cx, int cy) {
-        g2d.fillOval((cx - 1) * CELL_WIDTH + OFFSET - 4, (cy - 1) * CELL_WIDTH
-                + OFFSET - 4, 8, 8);
-    }
-
-
-
-
-    // 画棋子
+    // draw stone
     private void drawChess(Graphics g2d, int cx, int cy, int player) {
         if (player == 0)
             return;
@@ -149,7 +109,7 @@ public class GobangPanel extends JPanel {
                 * RATE - size / 2 + Y_OFFSET, size, size);
     }
 
-    // 画预选框
+    // draw selected cell
     private void drawCell(Graphics g2d, int x, int y, int c) {// c 是style
         int length = CELL_WIDTH / 4;
         int xx = (x - 1) * RATE + X_OFFSET;
@@ -170,7 +130,7 @@ public class GobangPanel extends JPanel {
         g2d.drawLine(x4, y4, x4, y4 - length);
     }
 
-    // 画落子顺序
+    // draw order
     private void drawOrder(Graphics g2d) {
         int[][] history = bd.getHistory();
         if (history.length > 0) {
@@ -178,8 +138,7 @@ public class GobangPanel extends JPanel {
             for (int i = 0; i < history.length; i++) {
                 int x = history[i][0];
                 int y = history[i][1];
-                String text = String.valueOf(i + 1);
-                // 居中
+                String text = String.valueOf(i + 1);                
                 FontMetrics fm = g2d.getFontMetrics();
                 int stringWidth = fm.stringWidth(text);
                 int stringAscent = fm.getAscent();
@@ -190,7 +149,7 @@ public class GobangPanel extends JPanel {
         }
     }
 
-    // 开始游戏
+    // start game
     public void startGame(int mode, int intel, int level, int node) {
         //if (isGameOver) {
             this.mode = mode;
@@ -207,7 +166,7 @@ public class GobangPanel extends JPanel {
 
     }
 
-    // 鼠标移动
+   
     private MouseMotionListener mouseMotionListener = new MouseMotionAdapter() {
         public void mouseMoved(MouseEvent e) {
             int tx = Math.round((e.getX() - OFFSET) * 1.0f / CELL_WIDTH) + 1;
@@ -225,7 +184,7 @@ public class GobangPanel extends JPanel {
         }
     };
 
-    // 鼠标点击
+ 
     private MouseListener mouseListener = new MouseAdapter() {
         public void mouseClicked(MouseEvent e) {
             if (isGameOver) {
@@ -236,17 +195,17 @@ public class GobangPanel extends JPanel {
             int y = Math.round((e.getY() - OFFSET) * 1.0f / CELL_WIDTH) + 1;
             if (cx >= 1 && cx <= Board.BOARD_SIZE && cy >= 1
                     && cy <= Board.BOARD_SIZE) {
-                if (mode == MANUAL) {// 双人
+                if (mode == MANUAL) {// human vs human
                     int mods = e.getModifiers();
-                    if ((mods & InputEvent.BUTTON1_MASK) != 0)// 鼠标左键
+                    if ((mods & InputEvent.BUTTON1_MASK) != 0)
                         putChess(x, y);
-                } else if (mode == HALF) {// 人机
+                } else if (mode == HALF) {// human vs computer
                     if (bd.getPlayer() == humanSide) {
                         int mods = e.getModifiers();
-                        if ((mods & InputEvent.BUTTON1_MASK) != 0) {// 鼠标左键
+                        if ((mods & InputEvent.BUTTON1_MASK) != 0) {
                             if (putChess(x, y)) {
                                 if (intel == TREE) {
-                                    int[] bestStep = br.findTreeBestStep();// 估值函数+搜索树AI
+                                    int[] bestStep = br.findTreeBestStep();
                                     putChess(bestStep[0], bestStep[1]);
                                 }
 
@@ -260,10 +219,10 @@ public class GobangPanel extends JPanel {
 
     private boolean putChess(int x, int y) {
         if (bd.moveStone(x, y)) {
-            lastStep[0] = x;// 保存上一步落子点
+            lastStep[0] = x;
             lastStep[1] = y;
             repaint();
-            int winSide = bd.judge();// 判断终局
+            int winSide = bd.judge();
             if (winSide > 0) {
                 if (winSide == humanSide) {
                     JOptionPane.showMessageDialog(GobangPanel.this, "White wins！");
@@ -272,10 +231,7 @@ public class GobangPanel extends JPanel {
                 } else {
                     JOptionPane.showMessageDialog(GobangPanel.this, "No winners!");
                 }
-
-                // 清除
-                bd.reset();
-//                area.setText("");
+                bd.reset();              
                 isGameOver = true;
                 repaint();
                 return false;
